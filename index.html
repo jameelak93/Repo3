@@ -2,133 +2,153 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Tempo Trails - Venues</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <style>
     body {
       margin: 0;
-      font-family: sans-serif;
-      background-color: #0c0c0c;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #0C0C0C;
       color: white;
     }
-    header {
+    nav {
       background: #111;
       padding: 10px 20px;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      gap: 20px;
+      font-weight: bold;
     }
     nav a {
-      color: #00ffe0;
-      margin-left: 15px;
+      color: #00FFE0;
       text-decoration: none;
     }
+    nav a:hover {
+      text-decoration: underline;
+    }
     h1 {
-      color: #00ffe0;
       margin: 20px;
+      color: #00FFE0;
     }
     #map {
       height: 400px;
-      margin: 0 20px 20px;
-      border: 2px solid #00ffe0;
-      border-radius: 12px;
+      width: 100%;
     }
     .container {
       display: flex;
       flex-wrap: wrap;
-      gap: 15px;
       padding: 20px;
+      gap: 20px;
     }
     .card {
       background: #1a1a1a;
-      border: 1px solid #00ffe0;
+      border: 1px solid #00FFE0;
       border-radius: 10px;
-      width: 280px;
+      width: 260px;
       overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .card:hover {
+      transform: scale(1.03);
     }
     .card img {
       width: 100%;
-      height: 180px;
+      height: 150px;
       object-fit: cover;
     }
     .card-content {
       padding: 10px;
     }
     .card-content h3 {
-      color: #00ffe0;
-      margin-top: 0;
+      margin: 0 0 10px;
+      color: #00FFE0;
     }
-    .card-content a {
-      color: #00ffe0;
-      text-decoration: none;
+    .card-content p {
+      margin: 0 0 5px;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h2>Tempo Trails</h2>
-    <nav>
-      <a href="index.html">Venues</a>
-      <a href="events.html">Events</a>
-      <a href="artists.html">Artists</a>
-      <a href="trails.html">Trails</a>
-      <a href="groups.html">Groups</a>
-      <a href="tickets.html">Tickets</a>
-    </nav>
-  </header>
+  <nav>
+    <a href="#">Venues</a>
+    <a href="#">Artists</a>
+    <a href="#">Trails</a>
+    <a href="#">Events</a>
+    <a href="#">Groups</a>
+    <a href="#">Tickets</a>
+  </nav>
 
-  <h1>Venues & Map</h1>
+  <h1>Tempo Trails - Venues</h1>
   <div id="map"></div>
   <div class="container" id="venuesContainer"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    async function loadJSON(path) {
-      const res = await fetch(path);
-      return res.json();
-    }
+    const placeholderImage = 'https://via.placeholder.com/260x150.png?text=No+Image';
 
-    function createVenueCard(venue) {
-      const placeholderImg = "https://via.placeholder.com/400x200?text=No+Image";
-      const img = venue.image && venue.image.trim() !== "" ? venue.image : placeholderImg;
+    const venues = [
+      {
+        name: "Smart Bar",
+        address: "3730 N Clark St, Chicago, IL",
+        website: "https://smartbarchicago.com",
+        image: "",
+        lat: 41.9509,
+        lng: -87.6556
+      },
+      {
+        name: "Spybar",
+        address: "646 N Franklin St, Chicago, IL",
+        website: "https://www.spybarchicago.com",
+        image: "https://www.spybarchicago.com/images/venue.jpg",
+        lat: 41.8933,
+        lng: -87.6356
+      },
+      {
+        name: "Primary Nightclub",
+        address: "5 W Division St, Chicago, IL",
+        website: "https://primarychi.com",
+        image: "",
+        lat: 41.9032,
+        lng: -87.6297
+      }
+    ];
 
-      return `
-        <div class="card">
-          <img src="${img}" alt="${venue.name}">
-          <div class="card-content">
-            <h3>${venue.name}</h3>
-            <p>${venue.address || "Address not available"}</p>
-            ${venue.website ? `<a href="${venue.website}" target="_blank">Visit Website</a>` : ""}
-          </div>
+    const map = L.map('map').setView([41.88, -87.63], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    const venuesContainer = document.getElementById('venuesContainer');
+    const markers = [];
+
+    venues.forEach((venue, index) => {
+      const image = venue.image && venue.image.trim() !== '' ? venue.image : placeholderImage;
+
+      // Create card
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <img src="${image}" alt="${venue.name}" onerror="this.src='${placeholderImage}'" />
+        <div class="card-content">
+          <h3>${venue.name}</h3>
+          <p>${venue.address}</p>
+          <a href="${venue.website}" target="_blank" style="color:#00FFE0;">Website</a>
         </div>
       `;
-    }
+      venuesContainer.appendChild(card);
 
-    async function init() {
-      const map = L.map("map").setView([41.8781, -87.6298], 11);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "&copy; OpenStreetMap contributors",
-      }).addTo(map);
+      // Add marker
+      const marker = L.marker([venue.lat, venue.lng]).addTo(map)
+        .bindPopup(`<b>${venue.name}</b><br>${venue.address}`);
+      markers.push(marker);
 
-      const venues = await loadJSON("chicago_venues.json");
-      const container = document.getElementById("venuesContainer");
-
-      venues.forEach((venue) => {
-        const cardHTML = createVenueCard(venue);
-        container.insertAdjacentHTML("beforeend", cardHTML);
-
-        if (venue.lat && venue.lng) {
-          const marker = L.marker([venue.lat, venue.lng]).addTo(map);
-          marker.bindPopup(`<strong>${venue.name}</strong><br>${venue.address || ""}`);
-        }
+      // Sync click
+      card.addEventListener('click', () => {
+        map.setView([venue.lat, venue.lng], 15);
+        marker.openPopup();
       });
-    }
-
-    init();
+    });
   </script>
 </body>
 </html>
