@@ -2,120 +2,126 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Tempo Trails – Venues</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tempo Trails - Venues</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      background-color: #0C0C0C;
-      color: white;
-    }
-    h1 {
-      text-align: center;
-      color: #00FFE0;
-      padding: 20px 0;
-      border-bottom: 1px solid #00FFE0;
-    }
-    #map {
-      height: 350px;
-      width: 100%;
-      border-bottom: 2px solid #00FFE0;
-    }
-    .container {
-      display: flex;
-      flex-wrap: wrap;
-      padding: 20px;
-      gap: 20px;
-      justify-content: center;
-    }
+    body { margin: 0; font-family: Arial, sans-serif; background-color: #0C0C0C; color: white; }
+    #map { height: 400px; }
+    .container { display: flex; flex-wrap: wrap; gap: 10px; padding: 10px; }
     .card {
-      width: 280px;
-      background-color: #1a1a1a;
+      background: #1a1a1a;
       border: 1px solid #00FFE0;
       border-radius: 8px;
-      overflow: hidden;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    .card:hover {
-      transform: scale(1.02);
-    }
-    .card img {
-      width: 100%;
-      height: 160px;
-      object-fit: cover;
-    }
-    .card-content {
       padding: 10px;
+      width: 300px;
+      cursor: pointer;
     }
-    .card-content h3 {
-      margin: 0;
-      color: #00FFE0;
-    }
-    .card-content p {
-      font-size: 0.9em;
-      margin: 6px 0;
-    }
-    a {
-      color: #00FFE0;
+    .card img { width: 100%; height: 180px; object-fit: cover; border-radius: 4px; }
+    .event-list { margin-top: 10px; }
+    .event-list p { margin: 5px 0; font-size: 0.9em; color: #ccc; }
+    .nav { background: #111; padding: 10px; text-align: center; }
+    .nav a { color: #00FFE0; margin: 0 15px; text-decoration: none; }
+    .reset-button {
+      background: #00FFE0;
+      border: none;
+      padding: 6px 12px;
+      margin: 10px;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 5px;
     }
   </style>
 </head>
 <body>
-  <h1>Tempo Trails – Venues</h1>
+  <div class="nav">
+    <a href="index.html">Home</a>
+    <a href="venues.html">Venues</a>
+    <a href="artists.html">Artists</a>
+    <a href="events.html">Events</a>
+    <a href="tickets.html">Tickets</a>
+    <a href="groups.html">Community</a>
+  </div>
+
+  <h1 style="padding: 10px;">Venues</h1>
   <div id="map"></div>
-  <div class="container" id="venuesContainer"></div>
+  <button class="reset-button" onclick="resetMap()">Reset Map</button>
+  <div class="container" id="venueContainer"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    const placeholder = 'https://via.placeholder.com/280x160.png?text=No+Image';
-    const map = L.map('map').setView([41.88, -87.63], 12);
+    const venueMap = L.map('map').setView([41.88, -87.63], 12);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+    }).addTo(venueMap);
 
-    const markers = [];
+    let markers = [];
+    let defaultView = venueMap.getBounds();
 
-    async function loadVenues() {
-      const res = await fetch('chicago_venues.json');
-      const data = await res.json();
-      const container = document.getElementById('venuesContainer');
-
-      data.forEach(venue => {
-        const { name, address, website, latitude, longitude, image } = venue;
-        const imgSrc = image?.trim() ? image : placeholder;
-
-        // Create card
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-          <img src="${imgSrc}" onerror="this.src='${placeholder}'" />
-          <div class="card-content">
-            <h3>${name}</h3>
-            <p>${address}</p>
-            <a href="${website}" target="_blank">Visit Website</a>
-          </div>
-        `;
-        container.appendChild(card);
-
-        // Create marker
-        const marker = L.marker([latitude, longitude])
-          .addTo(map)
-          .bindPopup(`<b>${name}</b><br>${address}`);
-
-        markers.push(marker);
-
-        // Card click interaction
-        card.addEventListener('click', () => {
-          map.setView([latitude, longitude], 15, { animate: true });
-          marker.openPopup();
-        });
-      });
+    function resetMap() {
+      venueMap.fitBounds(defaultView);
     }
 
-    loadVenues();
+    async function loadJSON(path) {
+      const res = await fetch(path);
+      return res.json();
+    }
+
+    function addMarker(venue, map) {
+      const marker = L.marker([venue.latitude, venue.longitude])
+        .addTo(map)
+        .bindPopup(`<strong>${venue.name}</strong><br>${venue.address}`);
+      markers.push({ venueName: venue.name, marker });
+    }
+
+    async function init() {
+      const venueData = await loadJSON("chicago_venues.json");
+      const eventsData = await loadJSON("events_data.json");
+      const container = document.getElementById("venueContainer");
+
+      venueData.forEach(v => {
+        // Add marker to map
+        addMarker(v, venueMap);
+
+        // Get image or fallback
+        const image = v.image || "https://via.placeholder.com/300x180?text=No+Image";
+
+        // Filter events matching venue
+        const eventsHere = eventsData.filter(e => e.location === v.name);
+        let eventsHTML = "";
+        if (eventsHere.length > 0) {
+          eventsHTML = "<div class='event-list'><strong>Upcoming Events:</strong>";
+          eventsHere.forEach(e => {
+            eventsHTML += `<p>${e.name} — ${e.date} ${e.time}</p>`;
+          });
+          eventsHTML += "</div>";
+        }
+
+        // Card HTML
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <img src="${image}" alt="${v.name}" onerror="this.src='https://via.placeholder.com/300x180?text=No+Image'" />
+          <h3>${v.name}</h3>
+          <p>${v.address}</p>
+          <a href="${v.website}" style="color:#00FFE0" target="_blank">Visit Website</a>
+          ${eventsHTML}
+        `;
+        card.onclick = () => {
+          const found = markers.find(m => m.venueName === v.name);
+          if (found) {
+            venueMap.setView(found.marker.getLatLng(), 15);
+            found.marker.openPopup();
+          }
+        };
+
+        container.appendChild(card);
+      });
+
+      defaultView = venueMap.getBounds();
+    }
+
+    init();
   </script>
 </body>
 </html>
