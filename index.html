@@ -5,21 +5,9 @@
   <title>Tempo Trails - Venues</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #0C0C0C;
-      color: white;
-    }
-    #map {
-      height: 400px;
-    }
-    .container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      padding: 10px;
-    }
+    body { margin: 0; font-family: Arial, sans-serif; background-color: #0C0C0C; color: white; }
+    #map { height: 400px; }
+    .container { display: flex; flex-wrap: wrap; gap: 10px; padding: 10px; }
     .card {
       background: #1a1a1a;
       border: 1px solid #00FFE0;
@@ -27,30 +15,29 @@
       padding: 10px;
       width: 300px;
       cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .card:hover {
+      transform: scale(1.02);
     }
     .card img {
       width: 100%;
       height: 180px;
       object-fit: cover;
       border-radius: 4px;
+      background: #222;
     }
-    .event-list {
-      margin-top: 10px;
-    }
-    .event-list p {
-      margin: 5px 0;
-      font-size: 0.9em;
-      color: #ccc;
-    }
-    .nav {
-      background: #111;
-      padding: 10px;
-      text-align: center;
-    }
+    .event-list { margin-top: 10px; }
+    .event-list p { margin: 5px 0; font-size: 0.9em; color: #ccc; }
+    .nav { background: #111; padding: 10px; text-align: center; }
     .nav a {
       color: #00FFE0;
       margin: 0 15px;
       text-decoration: none;
+      font-weight: bold;
+    }
+    .nav a:hover {
+      text-decoration: underline;
     }
     .reset-button {
       background: #00FFE0;
@@ -87,7 +74,7 @@
     }).addTo(venueMap);
 
     let markers = [];
-    let defaultView;
+    let defaultView = venueMap.getBounds();
 
     function resetMap() {
       venueMap.fitBounds(defaultView);
@@ -98,50 +85,44 @@
       return res.json();
     }
 
-    function addMarker(venue) {
+    function addMarker(venue, map) {
       const marker = L.marker([venue.latitude, venue.longitude])
-        .addTo(venueMap)
+        .addTo(map)
         .bindPopup(`<strong>${venue.name}</strong><br>${venue.address}`);
-      markers.push({ name: venue.name, marker });
+      markers.push({ venueName: venue.name, marker });
     }
 
     async function init() {
-      const venues = await loadJSON("chicago_venues.json");
-      const events = await loadJSON("events_data.json");
+      const venueData = await loadJSON("chicago_venues.json");
+      const eventsData = await loadJSON("events_data.json");
       const container = document.getElementById("venueContainer");
 
-      venues.forEach(v => {
-        // Image with fallback
-        const imageUrl = v.image && v.image.startsWith("http")
-          ? v.image
-          : "https://via.placeholder.com/300x180?text=No+Image";
+      venueData.forEach(v => {
+        addMarker(v, venueMap);
 
-        // Add pin
-        addMarker(v);
+        const image = (v.image && v.image.trim() !== "") ? v.image.trim() : "https://via.placeholder.com/300x180?text=No+Image";
 
-        // Match events
-        const matchedEvents = events.filter(e => e.location === v.name);
+        const eventsHere = eventsData.filter(e => e.location === v.name);
         let eventsHTML = "";
-        if (matchedEvents.length) {
-          eventsHTML += `<div class="event-list"><strong>Upcoming Events:</strong>`;
-          matchedEvents.forEach(e => {
+        if (eventsHere.length > 0) {
+          eventsHTML = "<div class='event-list'><strong>Upcoming Events:</strong>";
+          eventsHere.forEach(e => {
             eventsHTML += `<p>${e.name} — ${e.date} ${e.time}</p>`;
           });
-          eventsHTML += `</div>`;
+          eventsHTML += "</div>";
         }
 
-        // Build card
         const card = document.createElement("div");
         card.className = "card";
         card.innerHTML = `
-          <img src="${imageUrl}" alt="${v.name}" onerror="this.onerror=null; this.src='https://via.placeholder.com/300x180?text=No+Image';" />
+          <img src="${image}" alt="${v.name}" onerror="this.onerror=null; this.src='https://via.placeholder.com/300x180?text=No+Image';" />
           <h3>${v.name}</h3>
           <p>${v.address}</p>
           <a href="${v.website}" style="color:#00FFE0" target="_blank">Visit Website</a>
           ${eventsHTML}
         `;
         card.onclick = () => {
-          const found = markers.find(m => m.name === v.name);
+          const found = markers.find(m => m.venueName === v.name);
           if (found) {
             venueMap.setView(found.marker.getLatLng(), 15);
             found.marker.openPopup();
