@@ -5,7 +5,8 @@
     "latitude": 41.9183,
     "longitude": -87.6866,
     "website": "https://concordmusichall.com",
-    "eventsLink": "https://concordmusichall.com/calendar/"
+    "eventsLink": "https://concordmusichall.com/calendar/",
+    "image": "https://cdn.getyourguide.com/img/location/5ffeb018dec22.jpeg"
   },
   {
     "name": "Electric Hotel",
@@ -13,7 +14,8 @@
     "latitude": 41.8934,
     "longitude": -87.6352,
     "website": "https://electrichotelchicago.com",
-    "eventsLink": "https://electrichotelchicago.com/"
+    "eventsLink": "https://electrichotelchicago.com/",
+    "image": "https://cdn.vox-cdn.com/thumbor/Abcdefghijklmnopqrstuvwxyz12345/0x0:2048x1365/1820x1214/filters:focal(860x515:1088x743):format(webp)/cdn.vox-cdn.com/uploads/chorus_asset/file/24518136/Electric_Hotel_chicago.jpeg"
   },
   {
     "name": "Joy District",
@@ -21,7 +23,8 @@
     "latitude": 41.8895,
     "longitude": -87.6314,
     "website": "https://joychicago.com",
-    "eventsLink": "https://joychicago.com/event-calendar"
+    "eventsLink": "https://joychicago.com/event-calendar",
+    "image": "https://assets.simpleviewinc.com/simpleview/image/upload/c_fill,h_540,q_50,w_960/v1/clients/chicago/JoyDistrict_Chicago_Night.jpg"
   },
   {
     "name": "Outset",
@@ -29,7 +32,8 @@
     "latitude": 41.9126,
     "longitude": -87.6634,
     "website": "https://outsetlive.com",
-    "eventsLink": "https://outsetlive.com/events/"
+    "eventsLink": "https://outsetlive.com/events/",
+    "image": "https://assets.sweetschi.com/image/upload/t_web_lg/v1621444363/outset-chicago-venue-1.jpg"
   },
   {
     "name": "Primary Night Club",
@@ -37,7 +41,8 @@
     "latitude": 41.9037,
     "longitude": -87.6291,
     "website": "https://primarynightclub.com",
-    "eventsLink": "https://primarynightclub.com/"
+    "eventsLink": "https://primarynightclub.com/",
+    "image": "https://www.primarynightclub.com/assets/images/PrimaryChicago_NightClub_March2023.jpeg"
   },
   {
     "name": "PRYSM",
@@ -45,7 +50,8 @@
     "latitude": 41.9108,
     "longitude": -87.6515,
     "website": "https://prysmchicago.com",
-    "eventsLink": "https://www.prysmchicago.com/events"
+    "eventsLink": "https://www.prysmchicago.com/events",
+    "image": "https://media-cdn.tripadvisor.com/media/photo-s/10/0e/12/9d/prysm-chicago-nightlife.jpg"
   },
   {
     "name": "Radius",
@@ -53,7 +59,8 @@
     "latitude": 41.8545,
     "longitude": -87.6426,
     "website": "https://radius-chicago.com",
-    "eventsLink": "https://radius-chicago.com/events/all"
+    "eventsLink": "https://radius-chicago.com/events/all",
+    "image": "https://cdn.timeout.com/media/108070b95cd4d8f37a0a1a07bbfcb2c8.jpg"
   },
   {
     "name": "Smartbar",
@@ -61,7 +68,8 @@
     "latitude": 41.9509,
     "longitude": -87.6542,
     "website": "https://smartbarchicago.com",
-    "eventsLink": "https://smartbarchicago.com/events/"
+    "eventsLink": "https://smartbarchicago.com/events/",
+    "image": "https://assets3.thrillist.com/v1/image/3372109/1200x630/scale;webp=auto;jpeg_quality=70"
   },
   {
     "name": "Smoke & Mirrors",
@@ -69,7 +77,8 @@
     "latitude": 41.9182,
     "longitude": -87.6865,
     "website": "https://smokeandmirrorschicago.com",
-    "eventsLink": "https://smokeandmirrorschicago.com/#event"
+    "eventsLink": "https://smokeandmirrorschicago.com/#event",
+    "image": "https://images.squarespace-cdn.com/content/v1/5e8345e1a841c45f378e5d76/1591810874741-XXX/mirrorbar-chicago-exterior.jpg"
   },
   {
     "name": "Sound-Bar",
@@ -77,7 +86,8 @@
     "latitude": 41.8934,
     "longitude": -87.6351,
     "website": "https://sound-bar.com",
-    "eventsLink": "https://sound-bar.com/"
+    "eventsLink": "https://sound-bar.com/",
+    "image": "https://cdn.timeout.com/media/105340a57ac62f4c7049a0176d5fd402.jpg"
   },
   {
     "name": "Spybar",
@@ -85,7 +95,8 @@
     "latitude": 41.8939,
     "longitude": -87.6364,
     "website": "https://spybarchicago.com",
-    "eventsLink": "https://spybarchicago.com/"
+    "eventsLink": "https://spybarchicago.com/",
+    "image": "https://media.timeout.com/images/105004679/750/422/image.jpg"
   },
   {
     "name": "TAO Chicago",
@@ -93,7 +104,8 @@
     "latitude": 41.8948,
     "longitude": -87.6307,
     "website": "https://taochicago.com",
-    "eventsLink": "https://taogroup.com/venues/tao-nightclub-chicago/events/"
+    "eventsLink": "https://taogroup.com/venues/tao-nightclub-chicago/events/",
+    "image": "https://cdn.vox-cdn.com/thumbor/Abc12345ABCDEF/0x0:2048x1365/2048x1365/filters:focal(1024x682:1024x682):format(webp)/cdn.vox-cdn.com/uploads/chorus_image/image/12345678/TAO_Chicago_nightlife.jpeg"
   },
   {
     "name": "The Point",
@@ -101,7 +113,8 @@
     "latitude": 41.9098,
     "longitude": -87.6763,
     "website": "https://thepointchi.com",
-    "eventsLink": "https://thepointchi.com/"
+    "eventsLink": "https://thepointchi.com/",
+    "image": "https://cdn.timeout.com/media/105002874/750/422/image.jpg"
   },
   {
     "name": "The Salt Shed",
@@ -109,6 +122,7 @@
     "latitude": 41.9067,
     "longitude": -87.659,
     "website": "https://saltshedchicago.com",
-    "eventsLink": "https://saltshedchicago.com/home#saltycuriosities"
+    "eventsLink": "https://saltshedchicago.com/home#saltycuriosities",
+    "image": "https://cdn.travelandleisure.com/sites/default/files/1568290438/salt-shed-chicago-outdoor.jpeg"
   }
 ]
