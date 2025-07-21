@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Tempo Trails Dashboard</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <style>
@@ -43,66 +43,65 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const placeholder = "https://via.placeholder.com/260x160.png?text=No+Image";
-  let map = L.map('map').setView([41.88, -87.63], 12);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ attribution:'© OpenStreetMap' }).addTo(map);
-  let allMarkers = [];
+  const placeholder = 'https://via.placeholder.com/260x160.png?text=No+Image';
+  const map = L.map('map').setView([41.88, -87.63], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'© OpenStreetMap' }).addTo(map);
 
+  let markers = [];
   const endpoints = {
-    venues: ['chicago_venues.json', 'lat', 'lng', (v)=>v.name],
-    events: ['events_data.json', 'lat', 'lng', (e)=>e.name],
-    trails: ['Events_Trails.json', null, null, (t)=>t.trail_name],
-    artists: ['artists_placeholder.json', 'lat', 'lng', (a)=>a.name],
-    groups: ['community_groups.json', 'lat', 'lng', (g)=>g.name],
-    tickets: ['ticket_sellers.json', 'lat', 'lng', (s)=>s.name]
+    venues: {url:'chicago_venues.json', lat:'lat', lng:'lng', title:item => item.name},
+    events: {url:'events_data.json', lat:'lat', lng:'lng', title:item => item.name},
+    trails: {url:'Events_Trails.json', lat:null, lng:null, title:item => item.trail_name},
+    artists: {url:'artists_placeholder.json', lat:'lat', lng:'lng', title:item => item.name},
+    groups: {url:'community_groups.json', lat:'lat', lng:'lng', title:item => item.name},
+    tickets: {url:'ticket_sellers.json', lat:'lat', lng:'lng', title:item => item.name},
   };
 
-  async function loadSection(section) {
-    document.querySelectorAll('section').forEach(sec=>sec.classList.remove('active'));
-    document.getElementById(section).classList.add('active');
-    document.querySelectorAll('header a').forEach(a=>a.classList.toggle('active', a.dataset.section===section));
-
+  async function loadSection(section){
+    // activate tab
+    document.querySelectorAll('header a').forEach(a => a.classList.toggle('active', a.dataset.section === section));
+    document.querySelectorAll('section').forEach(s => s.id === section ? s.classList.add('active') : s.classList.remove('active'));
     clearMarkers();
-    const [url, latKey, lngKey, titleFn] = endpoints[section];
-    const data = await fetch(url).then(r=>r.json());
-    const arr = Array.isArray(data)?data:[data];
-    const container = document.getElementById(section+'Container');
-    container.innerHTML='';
 
-    arr.forEach(item=> {
+    const {url, lat, lng, title} = endpoints[section];
+    const res = await fetch(url);
+    if(!res.ok) return console.error(`Fetch ${url} failed ${res.status}`);
+    const data = await res.json();
+    const arr = Array.isArray(data) ? data : [data];
+    const container = document.getElementById(section + 'Container');
+    container.innerHTML = '';
+
+    arr.forEach(item => {
       const img = item.image?.trim() ? item.image : placeholder;
-      const title = titleFn(item);
       const card = document.createElement('div');
-      card.className='card';
-      card.innerHTML = `<img src="${img}" onerror="this.src='${placeholder}'"><div class="card-content"><h3>${title}</h3></div>`;
+      card.className = 'card';
+      card.innerHTML = `<img src="${img}" onerror="this.src='${placeholder}'"><div class="card-content"><h3>${title(item)}</h3></div>`;
       container.appendChild(card);
 
-      if(latKey && item[latKey] && item[lngKey]) {
-        const m = L.marker([item[latKey], item[lngKey]]).addTo(map);
-        m.bindPopup(`<b>${title}</b>`);
-        allMarkers.push(m);
-
-        card.onclick = () => {
-          map.setView(m.getLatLng(), 14, {animate:true});
-          m.openPopup();
-        };
+      if(lat && lng && item[lat] !== undefined && item[lng] !== undefined){
+        const marker = L.marker([item[lat], item[lng]]).addTo(map).bindPopup(`<b>${title(item)}</b>`);
+        markers.push(marker);
+        card.addEventListener('click', () => {
+          map.setView(marker.getLatLng(), 14, {animate:true});
+          marker.openPopup();
+        });
       }
     });
   }
 
-  function clearMarkers() {
-    allMarkers.forEach(m=>map.removeLayer(m));
-    allMarkers=[];
+  function clearMarkers(){
+    markers.forEach(m => map.removeLayer(m));
+    markers = [];
   }
 
-  document.querySelectorAll('header a').forEach(a=> {
-    a.addEventListener('click', ev=> {
-      ev.preventDefault();
+  document.querySelectorAll('header a').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
       loadSection(a.dataset.section);
     });
   });
 
-  loadSection('venues');
+  loadSection('venues'); // load default
 </script>
 
 </body>
