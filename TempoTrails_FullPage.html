@@ -1,0 +1,135 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tempo Trails Data Viewer</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+  body { font-family: Arial, sans-serif; background:#0C0C0C; color:white; margin:0; padding:0; }
+  h1, h2 { color:#00FFE0; padding: 0 20px; }
+  .container { display:flex; flex-wrap:wrap; gap:10px; margin:20px; }
+  .card { background:#1a1a1a; border:1px solid #00FFE0; border-radius:8px; padding:10px; width:250px; }
+  .card h3 { margin-top:0; color:#00FFE0; }
+  a { color:#00FFE0; }
+  nav { background: #1a1a1a; padding: 10px 20px; position: sticky; top: 0; z-index: 1000; }
+  nav a { margin-right: 15px; text-decoration: none; color: #00FFE0; }
+  #map { height: 400px; margin: 20px; border: 2px solid #00FFE0; border-radius: 8px; }
+</style>
+</head>
+<body>
+<nav>
+  <a href="#events">Events</a>
+  <a href="#trails">Trails</a>
+  <a href="#artists">Artists</a>
+  <a href="#venues">Venues</a>
+  <a href="#groups">Groups</a>
+  <a href="#tickets">Tickets</a>
+</nav>
+
+<h1>Tempo Trails</h1>
+
+<div id="map"></div>
+
+<section id="events">
+  <h2>Events</h2>
+  <div class="container" id="eventsContainer"></div>
+</section>
+
+<section id="trails">
+  <h2>Event Trails</h2>
+  <div class="container" id="trailsContainer"></div>
+</section>
+
+<section id="artists">
+  <h2>Artists</h2>
+  <div class="container" id="artistsContainer"></div>
+</section>
+
+<section id="venues">
+  <h2>Venues</h2>
+  <div class="container" id="venuesContainer"></div>
+</section>
+
+<section id="groups">
+  <h2>Community Groups</h2>
+  <div class="container" id="groupsContainer"></div>
+</section>
+
+<section id="tickets">
+  <h2>Ticket Sellers</h2>
+  <div class="container" id="ticketsContainer"></div>
+</section>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+async function loadJSON(path) {
+  const res = await fetch(path);
+  return res.json();
+}
+
+function createCard(html) {
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.innerHTML = html;
+  return div;
+}
+
+const map = L.map('map').setView([41.8781, -87.6298], 11);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+async function init() {
+  const events = await loadJSON('events_data.json');
+  const eventsContainer = document.getElementById('eventsContainer');
+  events.forEach(ev => {
+    const html = `<h3>${ev.name}</h3><p><strong>Date:</strong> ${ev.date} ${ev.time}</p><p><strong>Location:</strong> ${ev.location}</p>`;
+    eventsContainer.appendChild(createCard(html));
+  });
+
+  const trails = await loadJSON('Events_Trails.json');
+  const trailsContainer = document.getElementById('trailsContainer');
+  trails.forEach(trail => {
+    const stops = trail.stops.map(s => \`\${s.event_name} @ \${s.venue}\`).join('<br>');
+    const html = `<h3>${trail.trail_name}</h3><p>${stops}</p>`;
+    trailsContainer.appendChild(createCard(html));
+  });
+
+  const artists = await loadJSON('artists_placeholder.json');
+  const artistsContainer = document.getElementById('artistsContainer');
+  artists.forEach(artist => {
+    const html = `<h3>${artist.name}</h3><p>${artist.origin}</p><a href='${artist.instagram}'>Instagram</a>`;
+    artistsContainer.appendChild(createCard(html));
+  });
+
+  const venueData = await loadJSON('chicago_venues.json');
+  const venuesContainer = document.getElementById('venuesContainer');
+  const venues = Array.isArray(venueData) ? venueData : [venueData];
+  venues.forEach(v => {
+    const html = `<h3>${v.name}</h3><p>${v.address}</p><a href='${v.website}'>Website</a>`;
+    venuesContainer.appendChild(createCard(html));
+    if (v.lat && v.lng) {
+      L.marker([v.lat, v.lng]).addTo(map).bindPopup(v.name);
+    }
+  });
+
+  const groups = await loadJSON('community_groups.json');
+  const groupsContainer = document.getElementById('groupsContainer');
+  groups.forEach(g => {
+    const html = `<h3>${g.name}</h3><a href='${g.instagram}'>Instagram</a><br><a href='${g.linkToSite}'>Website</a>`;
+    groupsContainer.appendChild(createCard(html));
+  });
+
+  const sellers = await loadJSON('ticket_sellers.json');
+  const ticketsContainer = document.getElementById('ticketsContainer');
+  sellers.forEach(s => {
+    const html = `<h3>${s.name}</h3><a href='${s.url}'>${s.url}</a>`;
+    ticketsContainer.appendChild(createCard(html));
+  });
+}
+
+init();
+</script>
+</body>
+</html>

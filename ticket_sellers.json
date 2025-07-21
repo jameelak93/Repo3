@@ -1,0 +1,22 @@
+[
+  {
+    "name": "AXS",
+    "url": "https://www.axs.com/?dateFrom=&dateTo=2025-05-04#"
+  },
+  {
+    "name": "DICE",
+    "url": "https://dice.fm?from=2025-04-10&until=2025-05-04&priceTo=5"
+  },
+  {
+    "name": "POSH",
+    "url": "https://posh.vip/events?sort=Trending"
+  },
+  {
+    "name": "Eventbrite",
+    "url": "https://www.eventbrite.com/d/il--chicago/music--events/"
+  },
+  {
+    "name": "Ticketmaster",
+    "url": "https://www.ticketmaster.com/search?q=chicago"
+  }
+]
