@@ -1,154 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tempo Trails - Venues</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Tempo Trails Dashboard</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #0C0C0C;
-      color: white;
-    }
-    nav {
-      background: #111;
-      padding: 10px 20px;
-      display: flex;
-      gap: 20px;
-      font-weight: bold;
-    }
-    nav a {
-      color: #00FFE0;
-      text-decoration: none;
-    }
-    nav a:hover {
-      text-decoration: underline;
-    }
-    h1 {
-      margin: 20px;
-      color: #00FFE0;
-    }
-    #map {
-      height: 400px;
-      width: 100%;
-    }
-    .container {
-      display: flex;
-      flex-wrap: wrap;
-      padding: 20px;
-      gap: 20px;
-    }
-    .card {
-      background: #1a1a1a;
-      border: 1px solid #00FFE0;
-      border-radius: 10px;
-      width: 260px;
-      overflow: hidden;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    .card:hover {
-      transform: scale(1.03);
-    }
-    .card img {
-      width: 100%;
-      height: 150px;
-      object-fit: cover;
-    }
-    .card-content {
-      padding: 10px;
-    }
-    .card-content h3 {
-      margin: 0 0 10px;
-      color: #00FFE0;
-    }
-    .card-content p {
-      margin: 0 0 5px;
-    }
+    body { margin:0; font-family: sans-serif; background:#0C0C0C; color:white; }
+    header { background:#111; position:sticky; top:0; z-index:1000; display:flex; }
+    header a { flex:1; padding:15px; text-align:center; color:#00FFE0; text-decoration:none; }
+    header a.active, header a:hover { background:#222; }
+    #map { height:300px; margin:20px; border:2px solid #00FFE0; border-radius:8px;}
+    .container { display:flex; flex-wrap:wrap; gap:20px; padding:20px; }
+    .card { background:#1a1a1a; border:1px solid #00FFE0; border-radius:8px; width:260px; cursor:pointer; transition:0.2s; }
+    .card:hover { transform:scale(1.02); }
+    .card img { width:100%; height:160px; object-fit:cover; border-bottom:1px solid #00FFE0;}
+    .card-content { padding:10px; }
+    .card-content h3 { margin:0; color:#00FFE0; }
+    .section { display:none; }
+    .section.active { display:block; }
   </style>
 </head>
 <body>
-  <nav>
-    <a href="#">Venues</a>
-    <a href="#">Artists</a>
-    <a href="#">Trails</a>
-    <a href="#">Events</a>
-    <a href="#">Groups</a>
-    <a href="#">Tickets</a>
-  </nav>
 
-  <h1>Tempo Trails - Venues</h1>
-  <div id="map"></div>
+<header>
+  <a href="#" data-section="venues" class="active">Venues</a>
+  <a href="#" data-section="events">Events</a>
+  <a href="#" data-section="trails">Trails</a>
+  <a href="#" data-section="artists">Artists</a>
+  <a href="#" data-section="groups">Groups</a>
+  <a href="#" data-section="tickets">Tickets</a>
+</header>
+
+<div id="map"></div>
+
+<section id="venues" class="section active">
   <div class="container" id="venuesContainer"></div>
+</section>
+<section id="events" class="section">
+  <div class="container" id="eventsContainer"></div>
+</section>
+<section id="trails" class="section">
+  <div class="container" id="trailsContainer"></div>
+</section>
+<section id="artists" class="section">
+  <div class="container" id="artistsContainer"></div>
+</section>
+<section id="groups" class="section">
+  <div class="container" id="groupsContainer"></div>
+</section>
+<section id="tickets" class="section">
+  <div class="container" id="ticketsContainer"></div>
+</section>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>
-    const placeholderImage = 'https://via.placeholder.com/260x150.png?text=No+Image';
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const placeholder = "https://via.placeholder.com/260x160.png?text=No+Image";
+  let map = L.map('map').setView([41.88, -87.63], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ attribution:'© OpenStreetMap' }).addTo(map);
+  let allMarkers = [];
 
-    const venues = [
-      {
-        name: "Smart Bar",
-        address: "3730 N Clark St, Chicago, IL",
-        website: "https://smartbarchicago.com",
-        image: "",
-        lat: 41.9509,
-        lng: -87.6556
-      },
-      {
-        name: "Spybar",
-        address: "646 N Franklin St, Chicago, IL",
-        website: "https://www.spybarchicago.com",
-        image: "https://www.spybarchicago.com/images/venue.jpg",
-        lat: 41.8933,
-        lng: -87.6356
-      },
-      {
-        name: "Primary Nightclub",
-        address: "5 W Division St, Chicago, IL",
-        website: "https://primarychi.com",
-        image: "",
-        lat: 41.9032,
-        lng: -87.6297
-      }
-    ];
+  const endpoints = {
+    venues: ['chicago_venues.json', 'lat', 'lng', (v)=>v.name],
+    events: ['events_data.json', 'lat', 'lng', (e)=>e.name],
+    trails: ['Events_Trails.json', null, null, (t)=>t.trail_name],
+    artists: ['artists_placeholder.json', null, null, (a)=>a.name],
+    groups: ['community_groups.json', null, null, (g)=>g.name],
+    tickets: ['ticket_sellers.json', null, null, (s)=>s.name]
+  };
 
-    const map = L.map('map').setView([41.88, -87.63], 12);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
+  async function loadSection(section) {
+    document.querySelectorAll('section').forEach(sec=>sec.classList.remove('active'));
+    document.getElementById(section).classList.add('active');
+    document.querySelectorAll('header a').forEach(a=>a.classList.toggle('active', a.dataset.section===section));
 
-    const venuesContainer = document.getElementById('venuesContainer');
-    const markers = [];
+    clearMarkers();
+    const [url, latKey, lngKey, titleFn] = endpoints[section];
+    const data = await fetch(url).then(r=>r.json());
+    const arr = Array.isArray(data)?data:[data];
+    const container = document.getElementById(section+'Container');
+    container.innerHTML='';
 
-    venues.forEach((venue, index) => {
-      const image = venue.image && venue.image.trim() !== '' ? venue.image : placeholderImage;
-
-      // Create card
+    arr.forEach(item=> {
+      const img = item.image?.trim() ? item.image : placeholder;
+      const title = titleFn(item);
       const card = document.createElement('div');
-      card.className = 'card';
-      card.innerHTML = `
-        <img src="${image}" alt="${venue.name}" onerror="this.src='${placeholderImage}'" />
-        <div class="card-content">
-          <h3>${venue.name}</h3>
-          <p>${venue.address}</p>
-          <a href="${venue.website}" target="_blank" style="color:#00FFE0;">Website</a>
-        </div>
-      `;
-      venuesContainer.appendChild(card);
+      card.className='card';
+      card.innerHTML = `<img src="${img}" onerror="this.src='${placeholder}'"><div class="card-content"><h3>${title}</h3></div>`;
+      container.appendChild(card);
 
-      // Add marker
-      const marker = L.marker([venue.lat, venue.lng]).addTo(map)
-        .bindPopup(`<b>${venue.name}</b><br>${venue.address}`);
-      markers.push(marker);
+      if(latKey && item[latKey] && item[lngKey]) {
+        const m = L.marker([item[latKey], item[lngKey]]).addTo(map);
+        m.bindPopup(`<b>${title}</b>`);
+        allMarkers.push(m);
 
-      // Sync click
-      card.addEventListener('click', () => {
-        map.setView([venue.lat, venue.lng], 15);
-        marker.openPopup();
-      });
+        card.onclick = () => {
+          map.setView(m.getLatLng(), 14, {animate:true});
+          m.openPopup();
+        };
+      }
     });
-  </script>
+  }
+
+  function clearMarkers() {
+    allMarkers.forEach(m=>map.removeLayer(m));
+    allMarkers=[];
+  }
+
+  document.querySelectorAll('header a').forEach(a=> {
+    a.addEventListener('click', ev=> {
+      ev.preventDefault();
+      loadSection(a.dataset.section);
+    });
+  });
+
+  loadSection('venues');
+</script>
+
 </body>
 </html>
