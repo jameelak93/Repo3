@@ -34,24 +34,12 @@
 
 <div id="map"></div>
 
-<section id="venues" class="section active">
-  <div class="container" id="venuesContainer"></div>
-</section>
-<section id="events" class="section">
-  <div class="container" id="eventsContainer"></div>
-</section>
-<section id="trails" class="section">
-  <div class="container" id="trailsContainer"></div>
-</section>
-<section id="artists" class="section">
-  <div class="container" id="artistsContainer"></div>
-</section>
-<section id="groups" class="section">
-  <div class="container" id="groupsContainer"></div>
-</section>
-<section id="tickets" class="section">
-  <div class="container" id="ticketsContainer"></div>
-</section>
+<section id="venues" class="section active"><div class="container" id="venuesContainer"></div></section>
+<section id="events" class="section"><div class="container" id="eventsContainer"></div></section>
+<section id="trails" class="section"><div class="container" id="trailsContainer"></div></section>
+<section id="artists" class="section"><div class="container" id="artistsContainer"></div></section>
+<section id="groups" class="section"><div class="container" id="groupsContainer"></div></section>
+<section id="tickets" class="section"><div class="container" id="ticketsContainer"></div></section>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
@@ -64,9 +52,9 @@
     venues: ['chicago_venues.json', 'lat', 'lng', (v)=>v.name],
     events: ['events_data.json', 'lat', 'lng', (e)=>e.name],
     trails: ['Events_Trails.json', null, null, (t)=>t.trail_name],
-    artists: ['artists_placeholder.json', null, null, (a)=>a.name],
-    groups: ['community_groups.json', null, null, (g)=>g.name],
-    tickets: ['ticket_sellers.json', null, null, (s)=>s.name]
+    artists: ['artists_placeholder.json', 'lat', 'lng', (a)=>a.name],
+    groups: ['community_groups.json', 'lat', 'lng', (g)=>g.name],
+    tickets: ['ticket_sellers.json', 'lat', 'lng', (s)=>s.name]
   };
 
   async function loadSection(section) {
