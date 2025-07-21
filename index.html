@@ -16,7 +16,12 @@
       width: 300px;
       cursor: pointer;
     }
-    .card img { width: 100%; height: 180px; object-fit: cover; border-radius: 4px; }
+    .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
     .event-list { margin-top: 10px; }
     .event-list p { margin: 5px 0; font-size: 0.9em; color: #ccc; }
     .nav { background: #111; padding: 10px; text-align: center; }
@@ -83,11 +88,11 @@
         // Add marker to map
         addMarker(v, venueMap);
 
-        // Get image or fallback
-        const image = v.image || "https://via.placeholder.com/300x180?text=No+Image";
+        // Safe image logic
+        const image = (v.image && v.image.trim() !== "") ? v.image.trim() : "https://via.placeholder.com/300x180?text=No+Image";
 
         // Filter events matching venue
-        const eventsHere = eventsData.filter(e => e.location === v.name);
+        const eventsHere = eventsData.filter(e => e.location.trim().toLowerCase() === v.name.trim().toLowerCase());
         let eventsHTML = "";
         if (eventsHere.length > 0) {
           eventsHTML = "<div class='event-list'><strong>Upcoming Events:</strong>";
@@ -101,7 +106,9 @@
         const card = document.createElement("div");
         card.className = "card";
         card.innerHTML = `
-          <img src="${image}" alt="${v.name}" onerror="this.src='https://via.placeholder.com/300x180?text=No+Image'" />
+          <img src="${image}"
+               alt="${v.name}"
+               onerror="this.onerror=null; this.src='https://via.placeholder.com/300x180?text=No+Image';" />
           <h3>${v.name}</h3>
           <p>${v.address}</p>
           <a href="${v.website}" style="color:#00FFE0" target="_blank">Visit Website</a>
