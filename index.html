@@ -1,185 +1,134 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tempo Trail</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <title>Tempo Trails - Venues</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
   <style>
-    body { margin: 0; font-family: sans-serif; background-color: #0C0C0C; color: white; }
-    .rounded-xl { border-radius: 0.75rem; }
-    .border { border-width: 1px; border-style: solid; }
-    .text-white { color: white; }
-    .text-center { text-align: center; }
-    .text-xl { font-size: 1.25rem; }
-    .text-2xl { font-size: 1.5rem; }
-    .text-lg { font-size: 1.125rem; }
-    .font-bold { font-weight: bold; }
-    .font-medium { font-weight: 500; }
-    .leading-tight { line-height: 1.25; }
-    .p-4 { padding: 1rem; }
-    .ml-4 { margin-left: 1rem; }
-    .space-y-4 > * + * { margin-top: 1rem; }
-    .w-full { width: 100%; }
-    .w-1\/2 { width: 50%; }
-    .h-full { height: 100%; }
-    .h-12 { height: 3rem; }
-    .min-h-screen { min-height: 100vh; }
-    .flex { display: flex; }
-    .flex-col { flex-direction: column; }
-    .items-center { align-items: center; }
-    .justify-center { justify-content: center; }
-    .justify-between { justify-content: space-between; }
-    .gap-4 { gap: 1rem; }
-    .relative { position: relative; }
-    .absolute { position: absolute; }
-    .top-1\/2 { top: 50%; }
-    .left-0 { left: 0; }
-    .transform { transform: translateY(-50%); }
-    .overflow-hidden { overflow: hidden; }
-    .object-cover { object-fit: cover; }
-    .text-teal { color: #00FFE0; }
-    .border-teal { border-color: #00FFE0; }
-    .bg-dark { background-color: #0C0C0C; }
-    .h-180 { height: 180px; }
-    .h-240 { height: 240px; }
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background-color: #0c0c0c;
+      color: white;
+    }
+    header {
+      background: #111;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    nav a {
+      color: #00ffe0;
+      margin-left: 15px;
+      text-decoration: none;
+    }
+    h1 {
+      color: #00ffe0;
+      margin: 20px;
+    }
+    #map {
+      height: 400px;
+      margin: 0 20px 20px;
+      border: 2px solid #00ffe0;
+      border-radius: 12px;
+    }
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      padding: 20px;
+    }
+    .card {
+      background: #1a1a1a;
+      border: 1px solid #00ffe0;
+      border-radius: 10px;
+      width: 280px;
+      overflow: hidden;
+    }
+    .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+    .card-content {
+      padding: 10px;
+    }
+    .card-content h3 {
+      color: #00ffe0;
+      margin-top: 0;
+    }
+    .card-content a {
+      color: #00ffe0;
+      text-decoration: none;
+    }
   </style>
 </head>
 <body>
-  <div id="root"></div>
-  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <header>
+    <h2>Tempo Trails</h2>
+    <nav>
+      <a href="index.html">Venues</a>
+      <a href="events.html">Events</a>
+      <a href="artists.html">Artists</a>
+      <a href="trails.html">Trails</a>
+      <a href="groups.html">Groups</a>
+      <a href="tickets.html">Tickets</a>
+    </nav>
+  </header>
+
+  <h1>Venues & Map</h1>
+  <div id="map"></div>
+  <div class="container" id="venuesContainer"></div>
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script type="text/babel">
-
-const { useState, useEffect, useRef } = React;
-
-const sampleEvents = [
-  { id: 1, name: "Pulse Club", time: "10:30 PM", trail: "Neon Nights", coordinates: [41.891, -87.624], location: "123 Main St", artists: ["DJ Neon", "Bassline Benny"] },
-  { id: 2, name: "Orbit Lounge", time: "11:00 PM", trail: "Neon Nights", coordinates: [41.892, -87.628], location: "456 Cosmic Ave", artists: ["Luna Loop", "Echo Mike"] },
-  { id: 3, name: "Terminal X", time: "11:45 PM", trail: "Neon Nights", coordinates: [41.894, -87.63], location: "789 Terminal Rd", artists: ["Terminal Tom", "Jetset Jenna"] }
-];
-
-const LOADING_GIF = "https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif";
-const IMAGE_API = "https://prod-44.westus.logic.azure.com:443/workflows/bae271e6ed5b4cd39b21011746a58ab1/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=jVCUiSPAD3i7Ub1Z6KPf5TjW5PJXFWlz8EFn8lltEHg";
-
-function InlineMap({ pins, focus }) {
-  const mapRef = useRef(null);
-  const mapContainer = useRef(null);
-
-  useEffect(() => {
-    if (mapRef.current) return;
-
-    const map = L.map(mapContainer.current).setView(focus?.coordinates || [41.889, -87.623], 16);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "&copy; OpenStreetMap contributors"
-    }).addTo(map);
-
-    pins.forEach(p => {
-      L.marker(p.coordinates, {
-        icon: L.icon({
-          iconUrl: focus && focus.id === p.id ? "https://maps.gstatic.com/mapfiles/ms2/micons/yellow-dot.png" : "https://maps.gstatic.com/mapfiles/ms2/micons/blue-dot.png",
-          iconSize: [30, 30]
-        })
-      }).addTo(map);
-    });
-
-    mapRef.current = map;
-    return () => {
-      map.remove();
-      mapRef.current = null;
-    };
-  }, [pins, focus]);
-
-  return <div ref={mapContainer} className="w-full h-180 rounded-xl overflow-hidden border border-teal" />;
-}
-
-function TempoScapeMobile() {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [imageSrc, setImageSrc] = useState(LOADING_GIF);
-  const [isLoading, setIsLoading] = useState(true);
-  const focusEvent = sampleEvents[currentIndex];
-
-  useEffect(() => {
-    let ignore = false;
-    async function fetchImage() {
-      setIsLoading(true);
-      setImageSrc(LOADING_GIF);
-      try {
-        const res = await fetch(IMAGE_API, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: focusEvent.id })
-        });
-        const data = await res.text();
-        if (!ignore && data.startsWith("http")) {
-          setImageSrc(data);
-        } else {
-          setImageSrc(LOADING_GIF);
-        }
-      } catch {
-        if (!ignore) setImageSrc(LOADING_GIF);
-      } finally {
-        if (!ignore) setIsLoading(false);
-      }
+  <script>
+    async function loadJSON(path) {
+      const res = await fetch(path);
+      return res.json();
     }
-    if (focusEvent && focusEvent.id) fetchImage();
-    return () => { ignore = true; };
-  }, [focusEvent]);
 
-  const handleSwipe = (dir) => {
-    setCurrentIndex(prev => {
-      let newIndex = dir === "left" ? prev + 1 : prev - 1;
-      if (newIndex < 0) newIndex = sampleEvents.length - 1;
-      if (newIndex >= sampleEvents.length) newIndex = 0;
-      return newIndex;
-    });
-  };
+    function createVenueCard(venue) {
+      const placeholderImg = "https://via.placeholder.com/400x200?text=No+Image";
+      const img = venue.image && venue.image.trim() !== "" ? venue.image : placeholderImg;
 
-  return (
-    <div className="bg-dark min-h-screen text-white font-sans flex flex-col items-center p-4 space-y-4">
-      <div className="text-2xl font-bold text-teal">TEMPO TRAILS</div>
-      <div className="flex w-full gap-4">
-        <div className="flex flex-col gap-4 w-1/2">
-          <div className="border border-teal rounded-xl p-4 text-left">
-            <div className="text-teal font-medium text-sm">Location</div>
-            <div className="text-white text-xl font-bold leading-tight">{focusEvent?.location}</div>
-          </div>
-          <div className="border border-teal rounded-xl p-4 text-left">
-            <div className="text-teal font-medium text-sm">ARTISTS</div>
-            <ul className="list-disc ml-4 text-base">
-              {focusEvent?.artists?.map((artist, idx) => (
-                <li key={idx}>{artist}</li>
-              ))}
-            </ul>
+      return `
+        <div class="card">
+          <img src="${img}" alt="${venue.name}">
+          <div class="card-content">
+            <h3>${venue.name}</h3>
+            <p>${venue.address || "Address not available"}</p>
+            ${venue.website ? `<a href="${venue.website}" target="_blank">Visit Website</a>` : ""}
           </div>
         </div>
-        <div className="w-1/2">
-          <InlineMap pins={sampleEvents} focus={focusEvent} />
-        </div>
-      </div>
-      <div className="relative w-full h-240 border border-teal rounded-xl overflow-hidden">
-        {isLoading ? (
-          <div className="h-full flex items-center justify-center text-teal">
-            <img src={LOADING_GIF} className="w-12 h-12" alt="Loading..." />
-          </div>
-        ) : (
-          <img key={imageSrc} src={imageSrc} alt="Event Poster" className="object-cover w-full h-full" />
-        )}
-        <div className="absolute top-1/2 left-0 transform w-full flex justify-between px-4">
-          <button onClick={() => handleSwipe("right")} className="text-4xl text-white">←</button>
-          <button onClick={() => handleSwipe("left")} className="text-4xl text-white">→</button>
-        </div>
-      </div>
-      <div className="text-center text-xl font-semibold">{focusEvent?.name}</div>
-      <div className="text-center text-teal text-lg">{focusEvent?.time}</div>
-    </div>
-  );
-}
+      `;
+    }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<TempoScapeMobile />);
+    async function init() {
+      const map = L.map("map").setView([41.8781, -87.6298], 11);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+      }).addTo(map);
+
+      const venues = await loadJSON("chicago_venues.json");
+      const container = document.getElementById("venuesContainer");
+
+      venues.forEach((venue) => {
+        const cardHTML = createVenueCard(venue);
+        container.insertAdjacentHTML("beforeend", cardHTML);
+
+        if (venue.lat && venue.lng) {
+          const marker = L.marker([venue.lat, venue.lng]).addTo(map);
+          marker.bindPopup(`<strong>${venue.name}</strong><br>${venue.address || ""}`);
+        }
+      });
+    }
+
+    init();
   </script>
 </body>
 </html>
